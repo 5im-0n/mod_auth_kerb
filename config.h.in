@@ -1,0 +1,28 @@
+
+/* Define to the version of this package. */
+/* Conflicts with defintions from Apache */
+/* #undef PACKAGE_VERSION */
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define if you are using the Heimdal implementation of Krb5 */
+#undef HEIMDAL
+
+/* Define if you want to enable support for Kerberos5 */
+#undef KRB5
+
+/* Define if you want to enable support for Kerberos4 */
+#undef KRB4
+
+/* Define if your GSSAPI library supports handling SPNEGO tokens */
+#undef GSSAPI_SUPPORTS_SPNEGO
+
+/* Define if your krb supports krb5_cc_new_unique function to deal with threading issues */
+#undef HAVE_KRB5_CC_NEW_UNIQUE
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H

@@ -1,0 +1,7 @@
+-- 5.4 --
+*implemented KrbServiceName Any to deal with multiple keytab entries for various browsers
+*implemented KrbLocalUserMapping i.e. to strip @REALM from username for further use
+*implemented already_succeeded function to avoid hammering the KDC with same auth requests in single connection
+*fixed threading issues
+*improved configure and Makefile scripts (mainly for BSD users)
+*fixed minor issues

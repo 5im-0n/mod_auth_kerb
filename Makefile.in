@@ -1,0 +1,38 @@
+APXS = @APXS@
+KRB5_CPPFLAGS = @KRB5_CPPFLAGS@
+KRB5_LDFLAGS = @KRB5_LDFLAGS@
+KRB4_CPPFLAGS = @KRB4_CPPFLAGS@
+KRB4_LDFLAGS = @KRB4_LDFLAGS@
+LIB_resolv = @LIB_resolv@
+SPNEGO_SRCS = @SPNEGO_SRCS@
+
+CPPFLAGS = -I. -Ispnegokrb5 $(KRB5_CPPFLAGS) $(KRB4_CPPFLAGS) $(DEFS)
+LDFLAGS = $(KRB5_LDFLAGS) $(KRB4_LDFLAGS) $(LIB_resolv)
+CFLAGS =
+
+all: src/mod_auth_kerb.so
+
+src/mod_auth_kerb.so: src/mod_auth_kerb.c $(SPNEGO_SRCS)
+	./apxs.sh "${CPPFLAGS}" "${LDFLAGS}" "${SPNEGO_SRCS}" "${APXS}" "-c" "src/mod_auth_kerb.c"
+
+install:
+	./apxs.sh "${CPPFLAGS}" "${LDFLAGS}" "${SPNEGO_SRCS}" "${APXS}" "-c -i" "src/mod_auth_kerb.c"
+
+clean:
+	for i in . src spnegokrb5; do \
+		$(RM) $$i/*.{o,so,a,la,lo,slo} core; \
+		$(RM) -rf $$i/.libs; \
+	done
+
+distclean: clean
+	$(RM) config.h config.status Makefile config.log
+	$(RM) -rf autom4te.cache
+
+make_release:
+	echo "Did you increase version numbers?"
+	autoconf
+	$(RM) -rf autom4te.cache
+	$(RM) -rf .cvsignore spnegokrb5/.cvsignore src/.cvsignore
+	$(RM) -rf CVS spnegokrb5/CVS src/CVS
+
+.PHONY: all install clean distclean
