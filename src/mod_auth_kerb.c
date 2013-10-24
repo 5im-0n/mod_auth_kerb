@@ -147,6 +147,15 @@ module auth_kerb_module;
 #define PROXYREQ_PROXY STD_PROXY
 #endif
 
+#if MODULE_MAGIC_NUMBER_MAJOR >= 20100606
+/* 2.4.x or later */
+#define WITH_HTTPD24 1
+#define client_ip(r) ((r)->useragent_ip)
+APLOG_USE_MODULE(auth_kerb);
+#else
+#define client_ip(r) ((r)->connection->remote_ip)
+#endif
+
 /*************************************************************************** 
  Auth Configuration Structure
  ***************************************************************************/
@@ -348,7 +357,11 @@ krb5_save_realms(cmd_parms *cmd, void *vsec, const char *arg)
 }
 
 static void
-log_rerror(const char *file, int line, int level, int status,
+log_rerror(const char *file, int line, 
+#ifdef WITH_HTTPD24
+	   int module_index,
+#endif
+	   int level, int status,
            const request_rec *r, const char *fmt, ...)
 {
    char errstr[1024];
@@ -359,7 +372,9 @@ log_rerror(const char *file, int line, int level, int status,
    va_end(ap);
 
    
-#ifdef STANDARD20_MODULE_STUFF
+#if defined(WITH_HTTPD24)
+   ap_log_rerror(file, line, module_index, level, status, r, "%s", errstr);
+#elif defined(STANDARD20_MODULE_STUFF)
    ap_log_rerror(file, line, level | APLOG_NOERRNO, status, r, "%s", errstr);
 #else
    ap_log_rerror(file, line, level | APLOG_NOERRNO, r, "%s", errstr);
@@ -1555,8 +1570,8 @@ already_succeeded(request_rec *r, char *auth_line)
    char keyname[1024];
 
    snprintf(keyname, sizeof(keyname) - 1,
-	"mod_auth_kerb::connection::%s::%ld", r->connection->remote_ip, 
-	r->connection->id);
+	    "mod_auth_kerb::connection::%s::%ld", client_ip(r), 
+	    r->connection->id);
 
    if (apr_pool_userdata_get((void**)&conn_data, keyname, r->connection->pool) != 0)
 	return NULL;
@@ -1709,7 +1724,7 @@ kerb_authenticate_user(request_rec *r)
        prevauth->last_return = ret;
        snprintf(keyname, sizeof(keyname) - 1,
            "mod_auth_kerb::connection::%s::%ld", 
-	   r->connection->remote_ip, r->connection->id);
+		client_ip(r), r->connection->id);
        apr_pool_userdata_set(prevauth, keyname, NULL, r->connection->pool);
    }
 
